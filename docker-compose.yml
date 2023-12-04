@@ -1,0 +1,29 @@
+version: '3'
+services:
+  inspector-influxdb:
+    image: influxdb:1.8
+    container_name: inspector-influxdb
+    networks:
+      - inspectornet
+    ports:
+      - "8086:8086"
+    volumes:
+      - influx-data:/var/lib/influxdb
+
+  inspector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inspector
+    networks:
+      - inspectornet
+    depends_on:
+      - inspector-influxdb
+
+networks:
+  inspectornet:
+    name: inspectornet
+    driver: bridge
+
+volumes:
+  influx-data:
