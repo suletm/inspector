@@ -46,7 +46,7 @@ func (ins *Inspector) MeasureAndLog() {
 				time.Now().Format(time.RFC3339), metrics.URL, metrics.ResponseTime.Seconds(), metrics.ConnectionTime.Seconds(), metrics.StatusCode, metrics.CertificateDays)
 
 			if err := ins.logToInfluxDB(metrics); err != nil {
-				fmt.Printf("[%v] [ERROR] InfluxDB Logging Failed for '%s': %s\n", time.Now().Format(time.RFC3339), ins.website, err)
+				fmt.Printf("[%v] [ERROR] InfluxDBSubConfig Logging Failed for '%s': %s\n", time.Now().Format(time.RFC3339), ins.website, err)
 			}
 		}
 	}
@@ -59,7 +59,7 @@ func (ins *Inspector) logToInfluxDB(metrics *ResponseMetrics) error {
 		Password: ins.dbConfig.Password,
 	})
 	if err != nil {
-		return fmt.Errorf("error creating InfluxDB client for '%s': %w", ins.website, err)
+		return fmt.Errorf("error creating InfluxDBSubConfig client for '%s': %w", ins.website, err)
 	}
 	defer c.Close()
 
