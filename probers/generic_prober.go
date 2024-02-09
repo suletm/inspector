@@ -13,7 +13,6 @@ type Prober interface {
 }
 
 func NewProber(c config.ProberSubConfig) (Prober, error) {
-	fmt.Printf("Creating a new prober with description: %s", c.Name)
 	var newProber Prober
 	switch c.Name {
 	case "basic_http_prober":

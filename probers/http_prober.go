@@ -51,7 +51,6 @@ func (httpProber *HTTPProber) RunOnce(c chan metrics.SingleMetric) error {
 	} else {
 		return fmt.Errorf("unsupported method: %s", httpProber.Method)
 	}
-	fmt.Printf("HTTPStatus=%d", response.StatusCode)
 	c <- metrics.SingleMetric{
 		Name:  "status",
 		Value: int64(response.StatusCode),

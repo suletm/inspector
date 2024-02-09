@@ -2,10 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	glogger "github.com/google/logger"
 	"inspector/config"
 	"inspector/metrics"
 	"inspector/probers"
+	"io"
 	"math/rand"
 	"os"
 	"time"
@@ -16,27 +17,44 @@ var TARGET_LIST_SCAN_WAIT_INTERVAL = 5 * time.Second
 var PROBER_RESTART_INTERVAL_JITTER_RANGE = 2
 
 func main() {
+
 	var configPath = flag.String("config_path", "", "Path to the configuration file. Mandatory argument.")
+	var logFilePath = flag.String("log_path", "", "A file where to write logs. Optional argument, defaults to stdout")
+
 	flag.Parse()
+
+	var logger *glogger.Logger
+
+	if *logFilePath != "" {
+		logFile, err := os.OpenFile(*logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
+		if err != nil {
+			glogger.Fatalf("Failed to open log file path: %s, error: %s", logFilePath, err)
+		}
+		defer logFile.Close()
+		logger = glogger.Init("InspectorLogger", false, true, logFile)
+	} else {
+		logger = glogger.Init("InspectorLogger", true, true, io.Discard)
+	}
+
 	if *configPath == "" {
-		fmt.Printf("Missing a mandatory argument: config_path. Try -help option for the list of supported" +
+		logger.Errorf("Missing a mandatory argument: config_path. Try -help option for the list of supported" +
 			"arguments")
 		os.Exit(1)
 	}
 	c, err := config.NewConfig(*configPath)
 	if err != nil {
-		fmt.Printf("Error reading config: %s", err)
+		logger.Infof("Error reading config: %s", err)
 		os.Exit(1)
 	}
-	fmt.Printf("Config parsed: %v", c.TimeSeriesDB[0])
+	logger.Infof("Config parsed: %v", c.TimeSeriesDB[0])
 
 	//TODO: enable support for multiple time series databases. For now only the first one is used from config.
 	mdb, err := metrics.NewMetricsDB(c.TimeSeriesDB[0])
 	if err != nil {
-		fmt.Printf("Failed initializing metrics db client with error: %s", err)
+		logger.Infof("Failed initializing metrics db client with error: %s", err)
 		os.Exit(1)
 	}
-	fmt.Printf("Initialized metrics database...")
+	logger.Infof("Initialized metrics database...")
 
 	metricsChannel := make(chan metrics.SingleMetric, 1000)
 
@@ -46,7 +64,7 @@ func main() {
 			case m := <-metricsChannel:
 				mdb.EmitSingle(m)
 			default:
-				fmt.Printf("Metrics channel is empty. Waiting some more...")
+				logger.Infof("Metrics channel is empty. Waiting some more...")
 				time.Sleep(METRIC_CHANNEL_POLL_INTERVAL)
 			}
 		}
@@ -58,28 +76,28 @@ func main() {
 				go func() {
 					prober, err := probers.NewProber(proberSubConfig)
 					if err != nil {
-						fmt.Printf("Failed creating new prober: %s for target: %s, error: %s", proberSubConfig.Name,
+						logger.Errorf("Failed creating new prober: %s for target: %s, error: %s", proberSubConfig.Name,
 							target.Name, err)
 						return
 					}
 					err = prober.Initialize()
 					if err != nil {
-						fmt.Printf("Failed initializing prober: %s for target: %s, error: %s", proberSubConfig.Name,
+						logger.Errorf("Failed initializing prober: %s for target: %s, error: %s", proberSubConfig.Name,
 							target.Name, err)
 						return
 					}
-					fmt.Printf("Successfully initialized prober: %s for target: %s", proberSubConfig.Name, target.Name)
+					logger.Infof("Successfully initialized prober: %s for target: %s", proberSubConfig.Name, target.Name)
 					err = prober.RunOnce(metricsChannel)
 					if err != nil {
-						fmt.Printf("Failed running prober: %s for target: %s, error: %s", proberSubConfig.Name,
+						logger.Errorf("Failed running prober: %s for target: %s, error: %s", proberSubConfig.Name,
 							target.Name, err)
 					}
 					err = prober.TearDown()
 					if err != nil {
-						fmt.Printf("Failed tearing down prober: %s for target: %s, error: %s", proberSubConfig.Name,
+						logger.Errorf("Failed tearing down prober: %s for target: %s, error: %s", proberSubConfig.Name,
 							target.Name, err)
 					}
-					fmt.Printf("Successfully torn down prober: %s for target: %s", proberSubConfig.Name, target.Name)
+					logger.Infof("Successfully torn down prober: %s for target: %s", proberSubConfig.Name, target.Name)
 				}()
 
 				jitter := rand.Intn(PROBER_RESTART_INTERVAL_JITTER_RANGE)
