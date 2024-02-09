@@ -15,6 +15,7 @@ import (
 var METRIC_CHANNEL_POLL_INTERVAL = 2 * time.Second
 var TARGET_LIST_SCAN_WAIT_INTERVAL = 5 * time.Second
 var PROBER_RESTART_INTERVAL_JITTER_RANGE = 2
+var METRIC_CHANNEL_SIZE = 1000
 
 func main() {
 
@@ -56,7 +57,8 @@ func main() {
 	}
 	logger.Infof("Initialized metrics database...")
 
-	metricsChannel := make(chan metrics.SingleMetric, 1000)
+	// TODO: determine what should the size of the channel be ?
+	metricsChannel := make(chan metrics.SingleMetric, METRIC_CHANNEL_SIZE)
 
 	go func() {
 		for {
