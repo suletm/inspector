@@ -40,5 +40,4 @@ func (flxDB *InfluxDB) EmitSingle(m SingleMetric) {
 	bp.AddPoint(p)
 	// Fire and forget
 	flxDB.client.Write(bp)
-	fmt.Printf("EmitSingle: metric sent...")
 }
