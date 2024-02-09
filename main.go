@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+var METRIC_CHANNEL_POLL_INTERVAL = 2 * time.Second
+var TARGET_LIST_SCAN_WAIT_INTERVAL = 5 * time.Second
+var PROBER_RESTART_INTERVAL_JITTER_RANGE = 2
+
 func main() {
 	var configPath = flag.String("config_path", "", "Path to the configuration file. Mandatory argument.")
 	flag.Parse()
@@ -35,50 +39,54 @@ func main() {
 	fmt.Printf("Initialized metrics database...")
 
 	metricsChannel := make(chan metrics.SingleMetric, 1000)
+
+	go func() {
+		for {
+			select {
+			case m := <-metricsChannel:
+				mdb.EmitSingle(m)
+			default:
+				fmt.Printf("Metrics channel is empty. Waiting some more...")
+				time.Sleep(METRIC_CHANNEL_POLL_INTERVAL)
+			}
+		}
+	}()
+
 	for {
 		for _, target := range c.Targets {
 			for _, proberSubConfig := range target.Probers {
-				prober, err := probers.NewProber(proberSubConfig)
-				if err != nil {
-					fmt.Printf("Failed creating new prober: %s for target: %s, error: %s", proberSubConfig.Name,
-						target.Name, err)
-					continue
-				}
-				err = prober.Initialize()
-				if err != nil {
-					fmt.Printf("Failed initializing prober: %s for target: %s, error: %s", proberSubConfig.Name,
-						target.Name, err)
-					continue
-				}
-				fmt.Printf("Successfully initialized prober: %s for target: %s", proberSubConfig.Name, target.Name)
-				err = prober.RunOnce(metricsChannel)
-				if err != nil {
-					fmt.Printf("Failed running prober: %s for target: %s, error: %s", proberSubConfig.Name,
-						target.Name, err)
-				}
-				err = prober.TearDown()
-				if err != nil {
-					fmt.Printf("Failed tearing down prober: %s for target: %s, error: %s", proberSubConfig.Name,
-						target.Name, err)
-				}
-				fmt.Printf("Successfully torn down prober: %s for target: %s", proberSubConfig.Name, target.Name)
-				jitter := rand.Intn(2)
+				go func() {
+					prober, err := probers.NewProber(proberSubConfig)
+					if err != nil {
+						fmt.Printf("Failed creating new prober: %s for target: %s, error: %s", proberSubConfig.Name,
+							target.Name, err)
+						return
+					}
+					err = prober.Initialize()
+					if err != nil {
+						fmt.Printf("Failed initializing prober: %s for target: %s, error: %s", proberSubConfig.Name,
+							target.Name, err)
+						return
+					}
+					fmt.Printf("Successfully initialized prober: %s for target: %s", proberSubConfig.Name, target.Name)
+					err = prober.RunOnce(metricsChannel)
+					if err != nil {
+						fmt.Printf("Failed running prober: %s for target: %s, error: %s", proberSubConfig.Name,
+							target.Name, err)
+					}
+					err = prober.TearDown()
+					if err != nil {
+						fmt.Printf("Failed tearing down prober: %s for target: %s, error: %s", proberSubConfig.Name,
+							target.Name, err)
+					}
+					fmt.Printf("Successfully torn down prober: %s for target: %s", proberSubConfig.Name, target.Name)
+				}()
+
+				jitter := rand.Intn(PROBER_RESTART_INTERVAL_JITTER_RANGE)
 				time.Sleep(time.Duration(jitter) * time.Second)
 			}
 		}
-		// For each target, spawn the set of defined probers in an infinite loop.
-
-		select {
-		case m := <-metricsChannel:
-			mdb.EmitSingle(m)
-		default:
-			fmt.Printf("Drained all metrics from the channel...")
-			break
-		}
-		time.Sleep(5 * time.Second)
+		// Wait before scanning through the targets from scratch
+		time.Sleep(TARGET_LIST_SCAN_WAIT_INTERVAL)
 	}
-
-	//inspector := NewInspector("https://sumnotes.net/", dbConfig, []string{"ResponseTime", "ConnectionTime", "StatusCode", "CertificateDays"}, 60*time.Second)
-
-	//	inspector.MeasureAndLog()
 }
