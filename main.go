@@ -91,11 +91,13 @@ func main() {
 					if err != nil {
 						logger.Errorf("Failed running prober: %s for target: %s, error: %s", proberSubConfig.Name,
 							target.Name, err)
+						return
 					}
 					err = prober.TearDown()
 					if err != nil {
 						logger.Errorf("Failed tearing down prober: %s for target: %s, error: %s", proberSubConfig.Name,
 							target.Name, err)
+						return
 					}
 					logger.Infof("Successfully torn down prober: %s for target: %s", proberSubConfig.Name, target.Name)
 				}()
