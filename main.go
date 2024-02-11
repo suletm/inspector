@@ -59,6 +59,10 @@ func main() {
 	// TODO: determine what should the size of the channel be ?
 	metricsChannel := make(chan metrics.SingleMetric, METRIC_CHANNEL_SIZE)
 
+	/*
+	 * Kick off an async  metrics collection from the metrics channel. Metrics are pushed into the metrics channel
+	 * by probers. Collected metrics are pushed out to the currently configured metrics database.
+	 */
 	go func() {
 		for {
 			select {
@@ -71,6 +75,11 @@ func main() {
 		}
 	}()
 
+	/*
+	 * Iterate over every target defined in the config, and per each target asynchronously initialize and run configured
+	 * probers. Each prober will inject metrics into the metrics channel. The probers are expected to be implemented
+	 * using the Prober interface.
+	 */
 	for {
 		for _, target := range c.Targets {
 			for _, proberSubConfig := range target.Probers {
