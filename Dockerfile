@@ -1,11 +1,15 @@
+# This is development dockerfile.
+# TODO: generalie this to the production dockerfile (as well as docker-composer.yml)
+
 FROM alpine:latest
 
-RUN apk update && apk add --no-cache go delve build-base gcc libc6-compat
+RUN apk update && apk add go delve build-base gcc libc6-compat
+
+# A workaround for intellij debugging support
+RUN apk update && apk add delve build-base gcc libc6-compat
 
 ENV GOPATH=/go PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
 
-WORKDIR /inspector
+WORKDIR /export
 
-
-CMD ["/bin/sh", "-c", "sleep infinity"]
-#CMD ["go", "run", "net.go", "inspector.go", "main.go"]
+CMD ["go", "run", "main.go", "--config_path", "config.json"]
