@@ -2,9 +2,9 @@ package probers
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"inspector/metrics"
+	"inspector/mylogger"
 	"net"
 	"net/http"
 	"time"
@@ -19,23 +19,32 @@ type HTTPProber struct {
 }
 
 func (httpProber *HTTPProber) Initialize() error {
+	return nil
+}
+
+func (httpProber *HTTPProber) Connect(c chan metrics.SingleMetric) error {
+	//TODO: handle https urls in httpProber
 	transport := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			start := time.Now()
 			conn, err := net.Dial(network, addr)
 			if err != nil {
-				fmt.Printf("[%v] [ERROR] Connection Failed for URL '%s', method: %s, error: %s", time.Now().Format(time.RFC3339),
+				mylogger.MainLogger.Errorf("Connection Failed for URL %s. Method: %s. Error: %s",
 					httpProber.Url, httpProber.Method, err)
 				return nil, err
 			}
+			c <- metrics.SingleMetric{
+				Name:  "connect_time",
+				Value: time.Since(start).Milliseconds(),
+			}
 			return conn, nil
 		},
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		DisableKeepAlives: true,
 	}
 	httpProber.client = &http.Client{
-		Transport:     transport,
-		CheckRedirect: nil,
-		Jar:           nil,
-		Timeout:       10 * time.Second,
+		//TODO: move http prober timeout to config
+		Timeout:   10 * time.Second,
+		Transport: transport,
 	}
 	return nil
 }
@@ -43,7 +52,9 @@ func (httpProber *HTTPProber) Initialize() error {
 func (httpProber *HTTPProber) RunOnce(c chan metrics.SingleMetric) error {
 	var response *http.Response
 	var err error
+	var start time.Time
 	if httpProber.Method == "GET" {
+		start = time.Now()
 		response, err = httpProber.client.Get(httpProber.Url)
 		if err != nil {
 			return err
@@ -52,9 +63,14 @@ func (httpProber *HTTPProber) RunOnce(c chan metrics.SingleMetric) error {
 		return fmt.Errorf("unsupported method: %s", httpProber.Method)
 	}
 	c <- metrics.SingleMetric{
+		Name:  "response_time",
+		Value: time.Since(start).Milliseconds(),
+	}
+	c <- metrics.SingleMetric{
 		Name:  "status",
 		Value: int64(response.StatusCode),
 	}
+	response.Body.Close()
 	return nil
 }
 

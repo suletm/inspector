@@ -88,6 +88,15 @@ func main() {
 						return
 					}
 					mylogger.MainLogger.Infof("Successfully initialized prober: %s for target: %s", proberSubConfig.Name, target.Name)
+
+					err = prober.Connect(metricsChannel)
+					if err != nil {
+						mylogger.MainLogger.Errorf("Failed prober connection: %s for target: %s, error: %s", proberSubConfig.Name,
+							target.Name, err)
+						return
+					}
+					mylogger.MainLogger.Infof("Successful prober connection: %s for target: %s", proberSubConfig.Name, target.Name)
+
 					err = prober.RunOnce(metricsChannel)
 					if err != nil {
 						mylogger.MainLogger.Errorf("Failed running prober: %s for target: %s, error: %s", proberSubConfig.Name,

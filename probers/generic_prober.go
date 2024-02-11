@@ -8,6 +8,7 @@ import (
 
 type Prober interface {
 	Initialize() error
+	Connect(chan metrics.SingleMetric) error
 	RunOnce(chan metrics.SingleMetric) error
 	TearDown() error
 }
