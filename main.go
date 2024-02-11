@@ -79,6 +79,10 @@ func main() {
 	 * Iterate over every target defined in the config, and per each target asynchronously initialize and run configured
 	 * probers. Each prober will inject metrics into the metrics channel. The probers are expected to be implemented
 	 * using the Prober interface.
+	 * Probers are not reused and run only once per iteration.
+	 *
+	 * TODO: as a further optimization, the targets can be partitioned and processed asynchronously. This will help
+	 *       if the number of targets become extremely large, but for now it's not a priority.
 	 */
 	for {
 		for _, target := range c.Targets {
