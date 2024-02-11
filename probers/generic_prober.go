@@ -8,7 +8,7 @@ import (
 
 // Prober defines the minimal requirements for a new prober implementation.
 // main package creates a new prober and calls these methods in a loop.
-// Prober is not supposed to be reused. Every run of the prober must tear down after runOnce. Next run of the prober
+// Probers are not supposed to be reused. Every run of the prober must tear down after runOnce. Next run of the prober
 // must create a new one. There are no safeguards for this, if you do reuse the prober -- you've been warned.
 type Prober interface {
 	// Initialize is a free form initialization function.
