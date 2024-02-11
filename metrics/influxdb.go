@@ -19,6 +19,9 @@ type InfluxDB struct {
 	database string
 }
 
+// InitializeClient created a new UDP based influx db client. The more secure way of doing would be to use http client
+// with batching to avoid lock-ups. For now, UDP client is easier to implement with the useful non-blocking property.
+// TODO: use HTTP client with batching instead of UDP.
 func (flxDB *InfluxDB) InitializeClient(addr string, port int, database string) error {
 	var err error
 	flxDB.client, err = influxdb_client.NewUDPClient(influxdb_client.UDPConfig{
@@ -34,6 +37,8 @@ func (flxDB *InfluxDB) InitializeClient(addr string, port int, database string) 
 	return nil
 }
 
+// EmitSingle sends a single metric out using the current influx db client. It implicitly adds the source host where
+// the metric is coming from. This operation is non-blocking since we use the UDP client.
 func (flxDB *InfluxDB) EmitSingle(m SingleMetric) {
 	var tags map[string]string
 	var additionalFields map[string]interface{}
