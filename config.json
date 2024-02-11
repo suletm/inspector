@@ -57,7 +57,7 @@
     {
         "id": 2040,
         "name": "a massively successful ecommerce website",
-        "plugins": []
+        "context": {}
     }
   ]
 }
