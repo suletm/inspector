@@ -19,6 +19,7 @@ import (
 
 type HTTPProber struct {
 	TargetID   string
+	ProberID   string
 	Interval   time.Duration
 	Url        string
 	Method     string
@@ -26,8 +27,9 @@ type HTTPProber struct {
 	client     *http.Client
 }
 
-func (httpProber *HTTPProber) Initialize(targetID string) error {
+func (httpProber *HTTPProber) Initialize(targetID, proberID string) error {
 	httpProber.TargetID = targetID
+	httpProber.ProberID = proberID
 	return nil
 }
 
@@ -47,6 +49,7 @@ func (httpProber *HTTPProber) Connect(c chan metrics.SingleMetric) error {
 			c <- metrics.CreateSingleMetric("connect_time", time.Since(start).Milliseconds(), nil,
 				map[string]string{
 					"target_id": httpProber.GetTarget(),
+					"prober_id": httpProber.GetProber(),
 				})
 			return conn, nil
 		},
@@ -77,11 +80,13 @@ func (httpProber *HTTPProber) RunOnce(c chan metrics.SingleMetric) error {
 	c <- metrics.CreateSingleMetric("response_time", time.Since(start).Milliseconds(), nil,
 		map[string]string{
 			"target_id": httpProber.GetTarget(),
+			"prober_id": httpProber.GetProber(),
 		})
 
 	c <- metrics.CreateSingleMetric("status", int64(response.StatusCode), nil,
 		map[string]string{
 			"target_id": httpProber.GetTarget(),
+			"prober_id": httpProber.GetProber(),
 		})
 
 	response.Body.Close()
@@ -95,4 +100,8 @@ func (httpProber *HTTPProber) TearDown() error {
 
 func (httpProber *HTTPProber) GetTarget() string {
 	return httpProber.TargetID
+}
+
+func (httpProber *HTTPProber) GetProber() string {
+	return httpProber.ProberID
 }

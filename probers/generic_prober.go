@@ -13,7 +13,7 @@ import (
 type Prober interface {
 	// Initialize is a free form initialization function. Use it to initialize your prober's internal state.
 	// You must initialize the target id at the very least.
-	Initialize(targetID string) error
+	Initialize(targetID, proberID string) error
 	// Connect is responsible for connection to the remote endpoint which is being monitored.
 	Connect(chan metrics.SingleMetric) error
 	// RunOnce is issued only once, and should include the main request logic for the prober.
@@ -22,6 +22,8 @@ type Prober interface {
 	TearDown() error
 	// GetTarget returns the target id this prober belongs to
 	GetTarget() string
+	// GetProber returns the id of the current prober.
+	GetProber() string
 }
 
 // NewProber creates a new prober using the type specific in the configuration file

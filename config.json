@@ -17,11 +17,12 @@
   "targets":
   [
     {
-      "id": 1984,
+      "id": "1984",
       "name": "my home page",
       "probers":
       [
         {
+          "id": "1",
           "name": "basic_http_prober",
           "context":
           {
@@ -35,6 +36,7 @@
           } 
         },
         {
+          "id": "2",
           "name": "workflow_prober",
           "context":
           {
@@ -55,7 +57,7 @@
       ]
     },
     {
-        "id": 2040,
+        "id": "2040",
         "name": "a massively successful ecommerce website",
         "context": {}
     }

@@ -35,14 +35,23 @@ type ProberContextSubConfig struct {
 	Parameters interface{} `json:"parameters"`
 }
 
+// ProberSubConfig holds configuration of each prober.
 type ProberSubConfig struct {
-	Name    string                 `json:"name"`
+	// Freeform identifier of the current prober.
+	Id string `json:"id"`
+	// A specific type of prober. It's a misnomer, should be renamed to type.
+	Name string `json:"name"`
+	// Prober configuration, dependent on the type of the prover above.
 	Context ProberContextSubConfig `json:"context"`
 }
 
+// TargetSubConfig is a logical grouping of probers belonging to same entity.
 type TargetSubConfig struct {
-	Id      int64             `json:"id"`
-	Name    string            `json:"name"`
+	// Freeform identifier of the current target.
+	Id string `json:"id"`
+	// Freeform name of the current target.
+	Name string `json:"name"`
+	// List of probers that live under this target.
 	Probers []ProberSubConfig `json:"probers"`
 }
 
