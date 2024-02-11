@@ -6,13 +6,24 @@ import (
 	"inspector/metrics"
 )
 
+// Prober defines the minimal requirements for a new prober implementation.
+// main package creates a new prober and calls these methods in a loop.
+// Prober is not supposed to be reused. Every run of the prober must tear down after runOnce. Next run of the prober
+// must create a new one. There are no safeguards for this, if you do reuse the prober -- you've been warned.
 type Prober interface {
+	// Initialize is a free form initialization function.
 	Initialize() error
+	// Connect is responsible for connection to the remote endpoint which is being monitored.
 	Connect(chan metrics.SingleMetric) error
+	// RunOnce is issued only once, and should include the main request logic for the prober.
 	RunOnce(chan metrics.SingleMetric) error
+	// TearDown is used for cleaning up the prober state. We do not reuse prober structures.
 	TearDown() error
 }
 
+// NewProber creates a new prober using the type specific in the configuration file
+// Currently only basic http prober is supported.
+// TODO: add more prober types.
 func NewProber(c config.ProberSubConfig) (Prober, error) {
 	var newProber Prober
 	switch c.Name {

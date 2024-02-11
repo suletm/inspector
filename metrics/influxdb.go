@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+/*
+ * Implementation of metrics collectors.
+ * Currently only InfluxDB is supported.
+ */
+
 type InfluxDB struct {
 	client   influxdb_client.Client
 	addr     string

@@ -10,6 +10,13 @@ import (
 	"time"
 )
 
+/*
+ * This is an implementation of a prober called: basic http prober. It currently supports limited features, but should be
+ * simple to extend from here.
+ * Basic http prober currently exports these 3 metrics: connect_time, status and request_time.
+ * TODO: add POST support, parameters support, HTTPS support to the basic http prober.
+ */
+
 type HTTPProber struct {
 	Interval   time.Duration
 	Url        string
