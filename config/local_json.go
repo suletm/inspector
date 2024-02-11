@@ -2,7 +2,7 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
+	"inspector/mylogger"
 	"io/ioutil"
 )
 
@@ -54,7 +54,7 @@ func NewConfig(path string) (*Config, error) {
 	var data Config
 	err = json.Unmarshal(fileContent, &data)
 	if err != nil {
-		fmt.Printf("Failed parsing config at path: %s with error: %s", path, err)
+		mylogger.MainLogger.Errorf("Failed parsing config at path: %s with error: %s", path, err)
 		return nil, err
 	}
 	return &data, err

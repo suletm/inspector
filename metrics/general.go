@@ -3,6 +3,7 @@ package metrics
 import (
 	"fmt"
 	"inspector/config"
+	"inspector/mylogger"
 )
 
 type SingleMetric struct {
@@ -26,7 +27,7 @@ func NewMetricsDB(c config.MetricsDBSubConfig) (MetricsDB, error) {
 			return nil, err
 		}
 	} else {
-		fmt.Printf("Specified metrics database is not supported in config: %v", c)
+		mylogger.MainLogger.Errorf("Specified metrics database is not supported in config: %v", c)
 		return nil, fmt.Errorf("MetricsDB defiend in configuration is not supported: %s", c)
 	}
 	return mdb, nil
