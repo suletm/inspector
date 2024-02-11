@@ -3,6 +3,7 @@ package metrics
 import (
 	"fmt"
 	influxdb_client "github.com/influxdata/influxdb1-client/v2"
+	"os"
 	"time"
 )
 
@@ -34,15 +35,31 @@ func (flxDB *InfluxDB) InitializeClient(addr string, port int, database string) 
 }
 
 func (flxDB *InfluxDB) EmitSingle(m SingleMetric) {
-	p, _ := influxdb_client.NewPoint(m.Name,
-		nil,
-		map[string]interface{}{"value": m.Value},
+	var tags map[string]string
+	var additionalFields map[string]interface{}
+
+	if m.Tags == nil {
+		tags = make(map[string]string)
+		tags["host"], _ = os.Hostname()
+	}
+	_, ok := tags["host"]
+	if !ok {
+		tags["host"], _ = os.Hostname()
+	}
+	// additionalFields can not be empty
+	if additionalFields == nil {
+		additionalFields = make(map[string]interface{})
+	}
+	additionalFields["value"] = m.Value
+	point, _ := influxdb_client.NewPoint(m.Name,
+		tags,
+		additionalFields,
 		time.Now())
 	bp, _ := influxdb_client.NewBatchPoints(influxdb_client.BatchPointsConfig{
 		Database:  flxDB.database,
 		Precision: "ns",
 	})
-	bp.AddPoint(p)
+	bp.AddPoint(point)
 	// Fire and forget
 	flxDB.client.Write(bp)
 }

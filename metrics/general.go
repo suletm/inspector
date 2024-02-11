@@ -7,8 +7,10 @@ import (
 )
 
 type SingleMetric struct {
-	Name  string
-	Value int64
+	Name             string
+	Value            int64
+	AdditionalFields map[string]interface{}
+	Tags             map[string]string
 }
 
 type MetricsDB interface {
