@@ -6,6 +6,11 @@ import (
 	"io/ioutil"
 )
 
+/*
+ * Implementation of local configuration in the json format.
+ * This will be extended to other types of configs in the future, database based configuration being the first priority.
+ */
+
 type InfluxDBSubConfig struct {
 	DatabaseURL  string `json:"database_url"`
 	Port         int    `json:"port"`
@@ -46,6 +51,8 @@ type Config struct {
 	Targets      []TargetSubConfig    `json:"targets"`
 }
 
+// NewConfig creates a new configuration. It currently assumes only json configuration.
+// TODO: extend NewConfig to support other types of config.
 func NewConfig(path string) (*Config, error) {
 	fileContent, err := ioutil.ReadFile(path)
 	if err != nil {

@@ -37,8 +37,8 @@ func main() {
 	}
 
 	if *configPath == "" {
-		mylogger.MainLogger.Errorf("Missing a mandatory argument: config_path. Try -help option for the list of supported" +
-			"arguments")
+		mylogger.MainLogger.Errorf("Missing a mandatory argument: config_path. Try -help option for the list of " +
+			"supported arguments")
 		os.Exit(1)
 	}
 	c, err := config.NewConfig(*configPath)
@@ -90,39 +90,42 @@ func main() {
 				go func() {
 					prober, err := probers.NewProber(proberSubConfig)
 					if err != nil {
-						mylogger.MainLogger.Errorf("Failed creating new prober: %s for target: %s, error: %s", proberSubConfig.Name,
-							target.Name, err)
+						mylogger.MainLogger.Errorf("Failed creating new prober: %s for target: %s, error: %s",
+							proberSubConfig.Name, target.Name, err)
 						return
 					}
 					err = prober.Initialize()
 					if err != nil {
-						mylogger.MainLogger.Errorf("Failed initializing prober: %s for target: %s, error: %s", proberSubConfig.Name,
-							target.Name, err)
+						mylogger.MainLogger.Errorf("Failed initializing prober: %s for target: %s, error: %s",
+							proberSubConfig.Name, target.Name, err)
 						return
 					}
-					mylogger.MainLogger.Infof("Successfully initialized prober: %s for target: %s", proberSubConfig.Name, target.Name)
+					mylogger.MainLogger.Infof("Successfully initialized prober: %s for target: %s",
+						proberSubConfig.Name, target.Name)
 
 					err = prober.Connect(metricsChannel)
 					if err != nil {
-						mylogger.MainLogger.Errorf("Failed prober connection: %s for target: %s, error: %s", proberSubConfig.Name,
-							target.Name, err)
+						mylogger.MainLogger.Errorf("Failed prober connection: %s for target: %s, error: %s",
+							proberSubConfig.Name, target.Name, err)
 						return
 					}
-					mylogger.MainLogger.Infof("Successful prober connection: %s for target: %s", proberSubConfig.Name, target.Name)
+					mylogger.MainLogger.Infof("Successful prober connection: %s for target: %s",
+						proberSubConfig.Name, target.Name)
 
 					err = prober.RunOnce(metricsChannel)
 					if err != nil {
-						mylogger.MainLogger.Errorf("Failed running prober: %s for target: %s, error: %s", proberSubConfig.Name,
-							target.Name, err)
+						mylogger.MainLogger.Errorf("Failed running prober: %s for target: %s, error: %s",
+							proberSubConfig.Name, target.Name, err)
 						return
 					}
 					err = prober.TearDown()
 					if err != nil {
-						mylogger.MainLogger.Errorf("Failed tearing down prober: %s for target: %s, error: %s", proberSubConfig.Name,
-							target.Name, err)
+						mylogger.MainLogger.Errorf("Failed tearing down prober: %s for target: %s, error: %s",
+							proberSubConfig.Name, target.Name, err)
 						return
 					}
-					mylogger.MainLogger.Infof("Successfully torn down prober: %s for target: %s", proberSubConfig.Name, target.Name)
+					mylogger.MainLogger.Infof("Successfully torn down prober: %s for target: %s",
+						proberSubConfig.Name, target.Name)
 				}()
 
 				jitter := rand.Intn(PROBER_RESTART_INTERVAL_JITTER_RANGE)
