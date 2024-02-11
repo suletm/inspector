@@ -29,6 +29,8 @@ func (httpProber *HTTPProber) Initialize() error {
 	return nil
 }
 
+// Connect starts a new connection. We need a new connection on each Connect() invocation because we want to measure
+// the connection time from scratch.
 func (httpProber *HTTPProber) Connect(c chan metrics.SingleMetric) error {
 	//TODO: handle https urls in httpProber
 	transport := &http.Transport{
