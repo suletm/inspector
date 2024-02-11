@@ -18,6 +18,15 @@ type MetricsDB interface {
 	EmitSingle(m SingleMetric)
 }
 
+func CreateSingleMetric(name string, value int64, additionalFields map[string]interface{}, tags map[string]string) SingleMetric {
+	return SingleMetric{
+		Name:             name,
+		Value:            value,
+		AdditionalFields: additionalFields,
+		Tags:             tags,
+	}
+}
+
 // NewMetricsDB initializes a metrics database specified by the config. It returns an object that implements the MetricsDB
 // interface. Currently only InfluxDB is supported.
 func NewMetricsDB(c config.MetricsDBSubConfig) (MetricsDB, error) {

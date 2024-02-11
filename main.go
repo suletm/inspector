@@ -10,6 +10,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -94,7 +95,7 @@ func main() {
 							proberSubConfig.Name, target.Name, err)
 						return
 					}
-					err = prober.Initialize()
+					err = prober.Initialize(strconv.FormatInt(target.Id, 10))
 					if err != nil {
 						mylogger.MainLogger.Errorf("Failed initializing prober: %s for target: %s, error: %s",
 							proberSubConfig.Name, target.Name, err)

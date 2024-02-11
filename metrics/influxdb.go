@@ -40,25 +40,22 @@ func (flxDB *InfluxDB) InitializeClient(addr string, port int, database string) 
 // EmitSingle sends a single metric out using the current influx db client. It implicitly adds the source host where
 // the metric is coming from. This operation is non-blocking since we use the UDP client.
 func (flxDB *InfluxDB) EmitSingle(m SingleMetric) {
-	var tags map[string]string
-	var additionalFields map[string]interface{}
-
 	if m.Tags == nil {
-		tags = make(map[string]string)
-		tags["host"], _ = os.Hostname()
+		m.Tags = make(map[string]string)
+		m.Tags["host"], _ = os.Hostname()
 	}
-	_, ok := tags["host"]
+	_, ok := m.Tags["host"]
 	if !ok {
-		tags["host"], _ = os.Hostname()
+		m.Tags["host"], _ = os.Hostname()
 	}
 	// additionalFields can not be empty
-	if additionalFields == nil {
-		additionalFields = make(map[string]interface{})
+	if m.AdditionalFields == nil {
+		m.AdditionalFields = make(map[string]interface{})
 	}
-	additionalFields["value"] = m.Value
+	m.AdditionalFields["value"] = m.Value
 	point, _ := influxdb_client.NewPoint(m.Name,
-		tags,
-		additionalFields,
+		m.Tags,
+		m.AdditionalFields,
 		time.Now())
 	bp, _ := influxdb_client.NewBatchPoints(influxdb_client.BatchPointsConfig{
 		Database:  flxDB.database,

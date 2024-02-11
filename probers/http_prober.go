@@ -18,6 +18,7 @@ import (
  */
 
 type HTTPProber struct {
+	TargetID   string
 	Interval   time.Duration
 	Url        string
 	Method     string
@@ -25,7 +26,8 @@ type HTTPProber struct {
 	client     *http.Client
 }
 
-func (httpProber *HTTPProber) Initialize() error {
+func (httpProber *HTTPProber) Initialize(targetID string) error {
+	httpProber.TargetID = targetID
 	return nil
 }
 
@@ -42,10 +44,10 @@ func (httpProber *HTTPProber) Connect(c chan metrics.SingleMetric) error {
 					httpProber.Url, httpProber.Method, err)
 				return nil, err
 			}
-			c <- metrics.SingleMetric{
-				Name:  "connect_time",
-				Value: time.Since(start).Milliseconds(),
-			}
+			c <- metrics.CreateSingleMetric("connect_time", time.Since(start).Milliseconds(), nil,
+				map[string]string{
+					"target_id": httpProber.GetTarget(),
+				})
 			return conn, nil
 		},
 		DisableKeepAlives: true,
@@ -71,14 +73,17 @@ func (httpProber *HTTPProber) RunOnce(c chan metrics.SingleMetric) error {
 	} else {
 		return fmt.Errorf("unsupported method: %s", httpProber.Method)
 	}
-	c <- metrics.SingleMetric{
-		Name:  "response_time",
-		Value: time.Since(start).Milliseconds(),
-	}
-	c <- metrics.SingleMetric{
-		Name:  "status",
-		Value: int64(response.StatusCode),
-	}
+
+	c <- metrics.CreateSingleMetric("response_time", time.Since(start).Milliseconds(), nil,
+		map[string]string{
+			"target_id": httpProber.GetTarget(),
+		})
+
+	c <- metrics.CreateSingleMetric("status", int64(response.StatusCode), nil,
+		map[string]string{
+			"target_id": httpProber.GetTarget(),
+		})
+
 	response.Body.Close()
 	return nil
 }
@@ -86,4 +91,8 @@ func (httpProber *HTTPProber) RunOnce(c chan metrics.SingleMetric) error {
 func (httpProber *HTTPProber) TearDown() error {
 	httpProber.client.CloseIdleConnections()
 	return nil
+}
+
+func (httpProber *HTTPProber) GetTarget() string {
+	return httpProber.TargetID
 }
