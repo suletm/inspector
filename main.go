@@ -67,6 +67,7 @@ func main() {
 		for {
 			select {
 			case m := <-metricsChannel:
+				m.Tags["region"] = c.Inspector.Region
 				mdb.EmitSingle(m)
 			default:
 				mylogger.MainLogger.Infof("Metrics channel is empty. Waiting some more...")

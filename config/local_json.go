@@ -55,7 +55,14 @@ type TargetSubConfig struct {
 	Probers []ProberSubConfig `json:"probers"`
 }
 
+// InspectorSubConfig is Inspector's own config which is global per instance of inspector.
+type InspectorSubConfig struct {
+	// Arbitrary Region identifier in which current instance of inspector is running
+	Region string `json:"region"`
+}
+
 type Config struct {
+	Inspector    InspectorSubConfig   `json:"inspector"`
 	TimeSeriesDB []MetricsDBSubConfig `json:"metrics_db"`
 	Targets      []TargetSubConfig    `json:"targets"`
 }

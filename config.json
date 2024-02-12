@@ -1,4 +1,7 @@
 {
+  "inspector": {
+    "region": "west-coast"
+  },
   "metrics_db":
   [
     {
