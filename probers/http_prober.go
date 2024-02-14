@@ -48,8 +48,8 @@ func (httpProber *HTTPProber) Connect(c chan metrics.SingleMetric) error {
 			}
 			c <- metrics.CreateSingleMetric("connect_time", time.Since(start).Milliseconds(), nil,
 				map[string]string{
-					"target_id": httpProber.GetTarget(),
-					"prober_id": httpProber.GetProber(),
+					"target_id": httpProber.GetTargetID(),
+					"prober_id": httpProber.GetProberID(),
 				})
 			return conn, nil
 		},
@@ -79,14 +79,14 @@ func (httpProber *HTTPProber) RunOnce(c chan metrics.SingleMetric) error {
 
 	c <- metrics.CreateSingleMetric("response_time", time.Since(start).Milliseconds(), nil,
 		map[string]string{
-			"target_id": httpProber.GetTarget(),
-			"prober_id": httpProber.GetProber(),
+			"target_id": httpProber.GetTargetID(),
+			"prober_id": httpProber.GetProberID(),
 		})
 
 	c <- metrics.CreateSingleMetric("status", int64(response.StatusCode), nil,
 		map[string]string{
-			"target_id": httpProber.GetTarget(),
-			"prober_id": httpProber.GetProber(),
+			"target_id": httpProber.GetTargetID(),
+			"prober_id": httpProber.GetProberID(),
 		})
 
 	response.Body.Close()
@@ -98,10 +98,10 @@ func (httpProber *HTTPProber) TearDown() error {
 	return nil
 }
 
-func (httpProber *HTTPProber) GetTarget() string {
+func (httpProber *HTTPProber) GetTargetID() string {
 	return httpProber.TargetID
 }
 
-func (httpProber *HTTPProber) GetProber() string {
+func (httpProber *HTTPProber) GetProberID() string {
 	return httpProber.ProberID
 }

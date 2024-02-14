@@ -20,10 +20,10 @@ type Prober interface {
 	RunOnce(chan metrics.SingleMetric) error
 	// TearDown is used for cleaning up the prober state. We do not reuse prober structures.
 	TearDown() error
-	// GetTarget returns the target id this prober belongs to
-	GetTarget() string
-	// GetProber returns the id of the current prober.
-	GetProber() string
+	// GetTargetID returns the target id this prober belongs to
+	GetTargetID() string
+	// GetProberID returns the id of the current prober.
+	GetProberID() string
 }
 
 // NewProber creates a new prober using the type specific in the configuration file
