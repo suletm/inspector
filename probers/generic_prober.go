@@ -21,9 +21,9 @@ type Prober interface {
 	// TearDown is used for cleaning up the prober state. We do not reuse prober structures.
 	TearDown() error
 	// GetTargetID returns the target id this prober belongs to
-	GetTargetID() string
+	getTargetID() string
 	// GetProberID returns the id of the current prober.
-	GetProberID() string
+	getProberID() string
 }
 
 // NewProber creates a new prober using the type specific in the configuration file
