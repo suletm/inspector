@@ -21,7 +21,7 @@
   [
     {
       "id": "1984",
-      "name": "my home page",
+      "name": "Github's pricing page",
       "probers":
       [
         {
@@ -45,7 +45,7 @@
           {
             "login_stage":
             {
-              "url": "www.yahoo.com/auth/signin.php",
+              "url": "https://finance.yahoo.com",
               "method": "POST",
               "parameters":
               {
