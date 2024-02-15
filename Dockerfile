@@ -1,5 +1,5 @@
 # This is development dockerfile.
-# TODO: generalie this to the production dockerfile (as well as docker-composer.yml)
+# TODO: generalize this to the production dockerfile (as well as docker-composer.yml)
 
 FROM alpine:latest
 
