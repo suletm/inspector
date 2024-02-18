@@ -34,8 +34,9 @@ func NewProber(c config.ProberSubConfig) (Prober, error) {
 	switch c.Name {
 	case "basic_http_prober":
 		newProber = &HTTPProber{
-			Url:    c.Context.Url,
-			Method: c.Context.Method,
+			Url:        c.Context.Url,
+			Method:     c.Context.Method,
+			Parameters: c.Context.RequestParameters,
 		}
 		break
 	default:

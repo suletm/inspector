@@ -7,6 +7,7 @@ import (
 	"inspector/mylogger"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -67,9 +68,17 @@ func (httpProber *HTTPProber) RunOnce(c chan metrics.SingleMetric) error {
 	var response *http.Response
 	var err error
 	var start time.Time
+
+	params := url.Values{}
+	for name, value := range httpProber.Parameters {
+		params.Add(name, value)
+	}
+	baseURL, _ := url.Parse(httpProber.Url)
+	baseURL.RawQuery = params.Encode()
+
 	if httpProber.Method == "GET" {
 		start = time.Now()
-		response, err = httpProber.client.Get(httpProber.Url)
+		response, err = httpProber.client.Get(baseURL.String())
 		if err != nil {
 			return err
 		}
