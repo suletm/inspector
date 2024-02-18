@@ -7,6 +7,7 @@ import (
 	"inspector/mylogger"
 	"net"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"time"
 )
@@ -25,6 +26,7 @@ type HTTPProber struct {
 	Url        string
 	Method     string
 	Parameters map[string]string
+	Cookies    map[string]string
 	client     *http.Client
 }
 
@@ -61,6 +63,22 @@ func (httpProber *HTTPProber) Connect(c chan metrics.SingleMetric) error {
 		Timeout:   10 * time.Second,
 		Transport: transport,
 	}
+
+	// Initialize cookies
+	baseURL, _ := url.Parse(httpProber.Url)
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		mylogger.MainLogger.Error("Could not initialize cookie jar in http prober")
+		return err
+	}
+	var cookies []*http.Cookie
+	for key, value := range httpProber.Cookies {
+		cookies = append(cookies, &http.Cookie{
+			Name:  key,
+			Value: value})
+	}
+	jar.SetCookies(baseURL, cookies)
+	httpProber.client.Jar = jar
 	return nil
 }
 

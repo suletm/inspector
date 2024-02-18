@@ -33,6 +33,8 @@ type ProberContextSubConfig struct {
 	Url               string            `json:"url"`
 	Method            string            `json:"method"`
 	RequestParameters map[string]string `json:"parameters"`
+	// Holds the list of cookies
+	Cookies map[string]string `json:"cookies"`
 }
 
 // ProberSubConfig holds configuration of each prober.

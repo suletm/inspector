@@ -37,6 +37,7 @@ func NewProber(c config.ProberSubConfig) (Prober, error) {
 			Url:        c.Context.Url,
 			Method:     c.Context.Method,
 			Parameters: c.Context.RequestParameters,
+			Cookies:    c.Context.Cookies,
 		}
 		break
 	default:
