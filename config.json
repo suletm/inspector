@@ -39,7 +39,8 @@
             "cookies":
             {
               "name": "value"
-            }
+            },
+            "allow_redirects": false
           }
         },
         {

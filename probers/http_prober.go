@@ -20,14 +20,15 @@ import (
  */
 
 type HTTPProber struct {
-	TargetID   string
-	ProberID   string
-	Interval   time.Duration
-	Url        string
-	Method     string
-	Parameters map[string]string
-	Cookies    map[string]string
-	client     *http.Client
+	TargetID       string
+	ProberID       string
+	Interval       time.Duration
+	Url            string
+	Method         string
+	Parameters     map[string]string
+	Cookies        map[string]string
+	AllowRedirects bool
+	client         *http.Client
 }
 
 func (httpProber *HTTPProber) Initialize(targetID, proberID string) error {
@@ -62,6 +63,14 @@ func (httpProber *HTTPProber) Connect(c chan metrics.SingleMetric) error {
 		//TODO: move http prober timeout to config
 		Timeout:   10 * time.Second,
 		Transport: transport,
+	}
+
+	// The default http client follows redirects 10 levels deep.
+	// Client should not follow http redirects if instructed by the config
+	if !httpProber.AllowRedirects {
+		httpProber.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
 	}
 
 	// Initialize cookies
