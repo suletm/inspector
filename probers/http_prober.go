@@ -7,6 +7,7 @@ import (
 	"inspector/mylogger"
 	"net"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"time"
 )
@@ -19,13 +20,15 @@ import (
  */
 
 type HTTPProber struct {
-	TargetID   string
-	ProberID   string
-	Interval   time.Duration
-	Url        string
-	Method     string
-	Parameters map[string]string
-	client     *http.Client
+	TargetID       string
+	ProberID       string
+	Interval       time.Duration
+	Url            string
+	Method         string
+	Parameters     map[string]string
+	Cookies        map[string]string
+	AllowRedirects bool
+	client         *http.Client
 }
 
 func (httpProber *HTTPProber) Initialize(targetID, proberID string) error {
@@ -61,6 +64,30 @@ func (httpProber *HTTPProber) Connect(c chan metrics.SingleMetric) error {
 		Timeout:   10 * time.Second,
 		Transport: transport,
 	}
+
+	// The default http client follows redirects 10 levels deep.
+	// Client should not follow http redirects if instructed by the config
+	if !httpProber.AllowRedirects {
+		httpProber.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
+	}
+
+	// Initialize cookies
+	baseURL, _ := url.Parse(httpProber.Url)
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		mylogger.MainLogger.Error("Could not initialize cookie jar in http prober")
+		return err
+	}
+	var cookies []*http.Cookie
+	for key, value := range httpProber.Cookies {
+		cookies = append(cookies, &http.Cookie{
+			Name:  key,
+			Value: value})
+	}
+	jar.SetCookies(baseURL, cookies)
+	httpProber.client.Jar = jar
 	return nil
 }
 

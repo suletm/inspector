@@ -35,8 +35,13 @@
             {
               "param1": "foo",
               "param2": "bar"
-            }
-          } 
+            },
+            "cookies":
+            {
+              "name": "value"
+            },
+            "allow_redirects": false
+          }
         },
         {
           "id": "2",
