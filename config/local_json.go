@@ -30,9 +30,9 @@ type MetricsDBSubConfig struct {
 }
 
 type ProberContextSubConfig struct {
-	Url        string      `json:"url"`
-	Method     string      `json:"method"`
-	Parameters interface{} `json:"parameters"`
+	Url               string            `json:"url"`
+	Method            string            `json:"method"`
+	RequestParameters map[string]string `json:"parameters"`
 }
 
 // ProberSubConfig holds configuration of each prober.
