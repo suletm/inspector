@@ -125,6 +125,15 @@ func (httpProber *HTTPProber) RunOnce(c chan metrics.SingleMetric) error {
 			"prober_id": httpProber.getProberID(),
 		})
 
+	if response.TLS != nil {
+		c <- metrics.CreateSingleMetric("certificate_expiration",
+			int64(response.TLS.PeerCertificates[0].NotAfter.Sub(time.Now()).Hours())/24, nil,
+			map[string]string{
+				"target_id": httpProber.getTargetID(),
+				"prober_id": httpProber.getProberID(),
+			})
+	}
+
 	response.Body.Close()
 	return nil
 }
